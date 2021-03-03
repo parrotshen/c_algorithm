@@ -11,31 +11,36 @@
  * @param [in]  bufSize  String buffer size.
  * @returns  Number of bits.
  */
-int long2bin(long value, char *pBuf, int bufSize)
+int long2bin(unsigned long long value, char *pBuf, int bufSize)
 {
     unsigned char bits[64];
     int len = 0;
     int i;
 
 
-    memset(pBuf, 0, bufSize);
-
     if (0 == value)
     {
+        if (bufSize < 2)
+        {
+            printf("ERR: un-enough buffer size (%d < 2)\n", bufSize);
+            pBuf[0] = 0x00;
+            return 0;
+        }
         pBuf[0] = '0';
+        pBuf[1] = 0x00;
         return 1;
     }
 
     while ( value )
     {
-        bits[len++] = (value & 0x1);
+        bits[len++] = (value & 0x1LL);
         value >>= 1;
     }
 
-    if (len > bufSize)
+    if ((len + 1) > bufSize)
     {
-        printf("ERR: un-enough buffer size (%d < %d)\n", bufSize, len);
-        return 0;
+        printf("ERR: un-enough buffer size (%d < %d)\n", bufSize, (len + 1));
+        if (len > 0) len = (len - 1);
     }
 
     for (i=len; i>0; i--)
@@ -43,6 +48,7 @@ int long2bin(long value, char *pBuf, int bufSize)
         *pBuf = (bits[i - 1] ? '1' : '0');
         pBuf++;
     }
+    *pBuf = 0x00;
 
     return len;
 }
@@ -56,18 +62,23 @@ int long2bin(long value, char *pBuf, int bufSize)
  */
 int double2bin(double value, char *pBuf, int bufSize)
 {
-    unsigned char bits[64];
+    unsigned char bits[128];
     int len = 0;
     int digit;
     int i;
 
 
-    memset(pBuf, 0, bufSize);
-
     if (0.0 == value)
     {
+        if (bufSize < 3)
+        {
+            printf("ERR: un-enough buffer size (%d < 3)\n", bufSize);
+            pBuf[0] = 0x00;
+            return 0;
+        }
         pBuf[0] = '.';
         pBuf[1] = '0';
+        pBuf[2] = 0x00;
         return 1;
     }
 
@@ -77,15 +88,15 @@ int double2bin(double value, char *pBuf, int bufSize)
 
         bits[len++] = (digit & 0x1);
 
-        if (64 == len) break;
+        if (128 == len) break;
 
         value = ((value * 2) - digit);
     }
 
-    if (len > bufSize)
+    if ((len + 2) > bufSize)
     {
-        printf("ERR: un-enough buffer size (%d < %d)\n", bufSize, len);
-        return 0;
+        printf("ERR: un-enough buffer size (%d < %d)\n", bufSize, (len + 2));
+        len = ((len > 1) ? (len - 2) : (len - 1));
     }
 
     *pBuf = '.'; pBuf++;
@@ -94,6 +105,7 @@ int double2bin(double value, char *pBuf, int bufSize)
         *pBuf = (bits[i] ? '1' : '0');
         pBuf++;
     }
+    *pBuf = 0x00;
 
     return len;
 }
@@ -156,10 +168,10 @@ int main(int argc, char *argv[])
 
     printf("1) floating-point to binary format\n");
 
-    lenInt = long2bin(atoi(pInt), pBuf, 80);
+    lenInt = long2bin(atoll(pInt), pBuf, 80);
 
     *pDec = '.';
-    lenDec = double2bin(atof(pDec), (pBuf + lenInt), 80);
+    lenDec = double2bin(atof(pDec), (pBuf + lenInt), 160);
     pDot = (pBuf + lenInt);
 
     printf("   %s\n\n", buf);
