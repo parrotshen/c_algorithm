@@ -1,4 +1,10 @@
 
+NOT: !
+XOR: ^
+AND: *
+OR : +
+
+
 f(A, B, C) = (!A * !B * !C) + (A * !B * !C) + (A * !B * C) + (A * B * C)
            = (A * C) + (!B * !C)
 
@@ -14,7 +20,7 @@ f(A, B, C) = (!A * !B * !C) + (A * !B * !C) + (A * !B * C) + (A * B * C)
  1 1 1   ( 0 *  0 *  0) + ( 1 * 0 *  0) + (1 *  0 * 1) + (1 * 1 * 1)    1    (1 * 1) + ( 0 *  0)
 
 
-Other exAmples:
+Other examples:
 
   (A * B) + (A * !B)
 = A

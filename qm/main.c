@@ -1,4 +1,4 @@
-/* Quine McClusky Minimization */
+/* Quine McClusky minimization */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +11,8 @@
 //    Macro declarations
 // /////////////////////////////////////////////////////////////////////////////
 
+#define BUFFER_SIZE 1023
+
 
 // /////////////////////////////////////////////////////////////////////////////
 //    Type declarations
@@ -21,8 +23,8 @@
 //    Variables declarations
 // /////////////////////////////////////////////////////////////////////////////
 
-char  g_bufIn[1024];
-char  g_bufOut[1024];
+char  g_bufIn[BUFFER_SIZE+1];
+char  g_bufOut[BUFFER_SIZE+1];
 
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -45,7 +47,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "OR : %c\n", _OR);
     fprintf(stderr, "\n");
 
-    getcwd(g_bufIn, 1023);
+    getcwd(g_bufIn, BUFFER_SIZE);
     strcat(g_bufIn, "/qm_mini.log");
     if (NULL == (pLog=fopen(g_bufIn, "w")))
     {
@@ -56,11 +58,12 @@ int main(int argc, char *argv[])
     fprintf(stderr, "> ");
 
     /* Read in single line from "stdin": */
-    for (i=0; (i<1023) && ((ch=getchar())!=EOF) && (ch!='\n'); i++)
+    for (i=0; (i<BUFFER_SIZE) && ((ch=getchar())!=EOF) && (ch!='\n'); i++)
     {
         g_bufIn[i] = ch;
     }
     g_bufIn[i] = 0x00;
+
     fprintf(stderr, "\n");
 
     if (0 == strcmp("quit", g_bufIn))
@@ -69,7 +72,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    error = QM(g_bufIn, g_bufOut, 1024, pLog);
+    error = QM(g_bufIn, g_bufOut, (BUFFER_SIZE + 1), pLog);
 
     switch ( error )
     {
