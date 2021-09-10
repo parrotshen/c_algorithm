@@ -1,6 +1,6 @@
 CC = gcc
 
-all: float double
+all: float double minimum-float minimum-double
 
 float: float.c
 	$(CC) -Wall $< -o $@
@@ -8,5 +8,11 @@ float: float.c
 double: double.c
 	$(CC) -Wall $< -o $@
 
+minimum-float: minimum-float.c
+	$(CC) -Wall $< -o $@
+
+minimum-double: minimum-double.c
+	$(CC) -Wall $< -o $@
+
 clean:
-	rm -f float double
+	rm -f float double minimum-float minimum-double
