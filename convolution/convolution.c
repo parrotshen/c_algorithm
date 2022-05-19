@@ -12,7 +12,7 @@
 */
 
 
-int dsp_convolution(
+int convolution(
     double  h[],
     int     hLen,
     double  x[],
@@ -20,6 +20,7 @@ int dsp_convolution(
     double  y[]
 )
 {
+#define DEBUG 0
     int yLen = (hLen + xLen - 1);
     int n;
     int k;
@@ -34,16 +35,28 @@ int dsp_convolution(
     */
     for (n=0; n<yLen; n++)
     {
+        #if DEBUG
+        printf("[%d]", n);
+        #endif
         y[n] = 0;
         for (k=0; k<hLen; k++)
         {
             i = (n - k);
             if ((i >= 0) && (i < xLen))
             {
+                #if DEBUG
+                printf(" %.1lf*%.1lf", h[k], x[i]);
+                #endif
                 y[n] += (h[k] * x[i]);
             }
         }
+        #if DEBUG
+        printf("\n");
+        #endif
     }
+    #if DEBUG
+    printf("\n");
+    #endif
 
     return yLen;
 }
@@ -61,7 +74,13 @@ int main(int argc, char *argv[])
     int i;
 
 
-    n = dsp_convolution(h, 3, x, 5, y);
+    n = convolution(
+            h,
+            sizeof(h)/sizeof(double),
+            x,
+            sizeof(x)/sizeof(double),
+            y
+        );
 
     for (i=0; i<n; i++)
     {
