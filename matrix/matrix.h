@@ -1,5 +1,5 @@
-#ifndef __UTIL_H__
-#define __UTIL_H__
+#ifndef __MATRIX_H__
+#define __MATRIX_H__
 
 
 void printMatrix(void *data, int row, int col);

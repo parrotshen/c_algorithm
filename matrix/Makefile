@@ -11,26 +11,26 @@ APPS += identity
 
 all: $(APPS)
 
-addition: addition.o util.o
+addition: addition.o matrix.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
-subtraction: subtraction.o util.o
+subtraction: subtraction.o matrix.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
-multiplication: multiplication.o util.o
+multiplication: multiplication.o matrix.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
-scalar: scalar.o util.o
+scalar: scalar.o matrix.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
-transposition: transposition.o util.o
+transposition: transposition.o matrix.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
-identity: identity.o util.o
+identity: identity.o matrix.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
 
-%.o: %.c util.h Makefile
+%.o: %.c matrix.h Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

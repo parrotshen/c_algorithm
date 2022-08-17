@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "util.h"
+#include "matrix.h"
 
 
 void printMatrix(void *matrix, int row, int col)
