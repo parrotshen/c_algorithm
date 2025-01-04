@@ -7,7 +7,7 @@ int main(void)
     int e;
 
     printf("\n");
-    printf(" e     %d-bit            value\n", (sizeof(double) * 8));
+    printf(" e     %ld-bit            value\n", (sizeof(double) * 8));
     p = (unsigned char *)&a;
 
     e = -1023;  /* min. value */

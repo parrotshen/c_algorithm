@@ -22,7 +22,7 @@ int main(void)
     int    size;
 
 
-    memset(BUF, 0x00, CRYPTO_SHA256_DIGEST_SIZE);
+    memset(buf, 0x00, CRYPTO_SHA256_DIGEST_SIZE);
     size = sizeof( _MESSAGE );
 
     /* SHA-256 hash function */
