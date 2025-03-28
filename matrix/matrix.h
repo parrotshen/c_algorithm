@@ -22,5 +22,7 @@ void scalarMatrix(void *in, int row, int col, int val, void *out);
 
 void transposeMatrix(void *in, int row, int col, void *out);
 
+int determinMatrix(void *in, int row, int col);
+
 
 #endif

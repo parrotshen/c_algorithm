@@ -7,6 +7,7 @@ APPS += subtraction
 APPS += multiplication
 APPS += scalar
 APPS += transposition
+APPS += determinant
 APPS += identity
 
 all: $(APPS)
@@ -24,6 +25,9 @@ scalar: scalar.o matrix.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
 transposition: transposition.o matrix.o
+	$(CC) $(LDFLAGS) $^ -o $@
+
+determinant: determinant.o matrix.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
 identity: identity.o matrix.o

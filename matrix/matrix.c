@@ -132,3 +132,62 @@ void transposeMatrix(void *in, int row, int col, void *out)
     }
 }
 
+int determinMatrix(void *in, int row, int col)
+{
+    int *A = in;
+    int det = 0;
+
+    if (row != col)
+    {
+        printf("ERR: (%d x %d) is not a square matrix\n", row, col);
+        return 0;
+    }
+
+    switch ( row )
+    {
+        case 1:
+            /* | 0 | */
+            det = A[0];
+            break;
+        case 2:
+            /*
+            * | 0  1 |
+            * | 2  3 |
+            */
+            det = ((A[0]*A[3]) - (A[1]*A[2]));
+            break;
+        case 3:
+            /*
+            * | 0  1  2 |
+            * | 3  4  5 |
+            * | 6  7  8 |
+            */
+            det
+             = ((A[0]*A[4]*A[8]) + (A[1]*A[5]*A[6]) + (A[2]*A[3]*A[7])) -
+               ((A[2]*A[4]*A[6]) + (A[0]*A[5]*A[7]) + (A[1]*A[3]*A[8]));
+            break;
+        case 4:
+            /*
+            * |  0  1  2  3 |
+            * |  4  5  6  7 |
+            * |  8  9 10 11 |
+            * | 12 13 14 15 |
+            */
+            det
+             = A[0]*((A[5]*A[10]*A[15] + A[6]*A[11]*A[13] + A[7]*A[9]*A[14]) -
+                     (A[7]*A[10]*A[13] + A[5]*A[11]*A[14] + A[6]*A[9]*A[15])) -
+               A[1]*((A[4]*A[10]*A[15] + A[6]*A[11]*A[12] + A[7]*A[8]*A[14]) -
+                     (A[7]*A[10]*A[12] + A[4]*A[11]*A[14] + A[6]*A[8]*A[15])) +
+               A[2]*((A[4]*A[ 9]*A[15] + A[5]*A[11]*A[12] + A[7]*A[8]*A[13]) -
+                     (A[7]*A[ 9]*A[12] + A[4]*A[11]*A[13] + A[5]*A[8]*A[15])) -
+               A[3]*((A[4]*A[ 9]*A[14] + A[5]*A[10]*A[12] + A[6]*A[8]*A[13]) -
+                     (A[6]*A[ 9]*A[12] + A[4]*A[10]*A[13] + A[5]*A[8]*A[14]));
+            break;
+        default:
+            printf("ERR: (%d x %d) is unavailable\n", row, col);
+            break;
+    }
+
+    return det;
+}
+
