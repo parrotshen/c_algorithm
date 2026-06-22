@@ -8,12 +8,10 @@
 /*
 * DFT:
 *          N-1
-*   X[k] = SUM( x[n] * e^(-j * 2* pi *n * k / N) )
+*   X[k] = SUM( x[n] * e^(-j * 2 * pi * k * n / N) )
 *          n=0
 *     k = 0, 1, 2 ... N-1
 */
-
-
 void dit_fft(tComplex *pData, int size)
 {
     tComplex swap;
@@ -58,7 +56,7 @@ void dit_fft(tComplex *pData, int size)
     {
         n = N;
         N <<= 1;
-        W[0] = (-6.283185307179586 / N);
+        W[0] = ((-2 * M_PI) / N);
         W[1] = 0.0;
 
         for (j=0; j<n; j++)
@@ -77,6 +75,86 @@ void dit_fft(tComplex *pData, int size)
                 pData[k  ].imag = pData[k].imag + tempI;
             }
         }
+    }
+}
+
+
+/*
+* IDFT:
+*                N-1
+*   x[n] = 1/N * SUM( X[k] * e^(j * 2 * pi * k * n / N) )
+*                k=0
+*     n = 0, 1, 2 ... N-1
+*/
+void idit_fft(tComplex *pData, int size)
+{
+    tComplex swap;
+    double C;
+    double S;
+    double W[2];
+    double tempR;
+    double tempI;
+    int N;
+    int n;
+    int i;
+    int j;
+    int k;
+
+
+    /* bit-reverse */
+    j = 0;
+    N = (size >> 1);
+    for (i=1; i<(size-1); i++)
+    {
+        n = N;
+        while (j >= n)
+        {
+            j -= n;
+            n >>= 1;
+        }
+        j += n;
+
+        if (i < j)
+        {
+            swap = pData[i];
+            pData[i] = pData[j];
+            pData[j] = swap;
+        }
+    }
+
+
+    /* N/2-point IDFT */
+    n = 0;
+    N = 1;
+    for (i=0; i<(int)log2(size); i++)
+    {
+        n = N;
+        N <<= 1;
+        W[0] = ((2 * M_PI) / N);
+        W[1] = 0.0;
+
+        for (j=0; j<n; j++)
+        {
+            C = cos( W[1] );
+            S = sin( W[1] );
+            W[1] += W[0];
+
+            for (k=j; k<size; k+=N)
+            {
+                tempR = (C * pData[k+n].real) - (S * pData[k+n].imag);
+                tempI = (S * pData[k+n].real) + (C * pData[k+n].imag);
+                pData[k+n].real = pData[k].real - tempR;
+                pData[k+n].imag = pData[k].imag - tempI;
+                pData[k  ].real = pData[k].real + tempR;
+                pData[k  ].imag = pData[k].imag + tempI;
+            }
+        }
+    }
+
+    for (i=0; i<size; i++)
+    {
+        pData[i].real /= size;
+        pData[i].imag /= size;
     }
 }
 
