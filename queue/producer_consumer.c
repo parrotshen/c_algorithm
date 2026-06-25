@@ -35,8 +35,6 @@ pthread_t tid_c;
 
 sem_t avail;
 
-int stop = 0;
-
 char *itemName[10] = {
     "bicycle",
     "book",
@@ -61,17 +59,15 @@ void signal_hdlr(int sig)
     pthread_cancel( tid_c );
 }
 
-int rand_number(void)
+int rand_number(int minUsec, int maxUsec)
 {
     struct timeval tv;
-    int min = 100000; // 100ms
-    int max = 10000000; // 10s
     int val;
 
     gettimeofday(&tv, NULL);
 
     srand( (unsigned int)tv.tv_usec );
-    val = ((rand() % (max - min + 1)) + min);
+    val = ((rand() % (maxUsec - minUsec + 1)) + minUsec);
 
     return val;
 }
@@ -87,7 +83,7 @@ void show_element(void *pObj, int index)
 {
     tItem *pItem = pObj;
 
-    printf("[%d] ", index);
+    printf("[%2d] ", index);
     if ( pItem )
     {
         printf("%d (%s)", pItem->no, pItem->name);
@@ -104,7 +100,7 @@ void *producer(void *arg)
 
     for (i=0; i<20; i++)
     {
-        val = rand_number();
+        val = rand_number(100000, 200000);
         /* a piece of time to produce */
         usleep( val );
 
@@ -131,8 +127,6 @@ void *producer(void *arg)
     }
 
     sem_post( &avail );
-    usleep( rand_number() );
-    stop = 1;
 
     pthread_exit(0);
 }
@@ -141,7 +135,7 @@ void *consumer(void *arg)
 {
     tItem *pItem = NULL;
 
-    while ( 1 )
+    for (;;)
     {
         if (sem_wait( &avail ) != 0)
         {
@@ -149,22 +143,19 @@ void *consumer(void *arg)
             break;
         }
 
-        if ( stop ) break;
-
         pItem = queue_get();
-        if ( pItem )
-        {
-            printf(
-                "[1;33m%s[0m ... %d (%s)\n",
-                __func__,
-                pItem->no,
-                pItem->name
-            );
-            free_element( pItem );
+        if (NULL == pItem) break;
 
-            /* a piece of time to consume */
-            usleep( rand_number() );
-        }
+        printf(
+            "[1;33m%s[0m ... %d (%s)\n",
+            __func__,
+            pItem->no,
+            pItem->name
+        );
+        free_element( pItem );
+
+        /* a piece of time to consume */
+        usleep( rand_number(100000, 500000) );
     }
 
     pthread_exit(0);

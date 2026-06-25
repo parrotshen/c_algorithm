@@ -8,11 +8,11 @@
 /*
 * DFT:
 *          N-1
-*   X[k] = SUM( x[n] * e^(-j * 2 * pi * k * n / N) )
+*   X[k] = SUM( x[n] * e^(-j*2*pi*k*n/N) )
 *          n=0
 *     k = 0, 1, 2 ... N-1
 */
-void dit_fft(tComplex *pData, int size)
+void fft(tComplex *pData, unsigned int size)
 {
     tComplex swap;
     double C;
@@ -82,11 +82,11 @@ void dit_fft(tComplex *pData, int size)
 /*
 * IDFT:
 *                N-1
-*   x[n] = 1/N * SUM( X[k] * e^(j * 2 * pi * k * n / N) )
+*   x[n] = 1/N * SUM( X[k] * e^(j*2*pi*k*n/N) )
 *                k=0
 *     n = 0, 1, 2 ... N-1
 */
-void idit_fft(tComplex *pData, int size)
+void ifft(tComplex *pData, unsigned int size)
 {
     tComplex swap;
     double C;
@@ -163,40 +163,49 @@ int main(int argc, char *argv[])
 {
     char *pIn = NULL;
     char *pOut = NULL;
-    int size = 0;
+    unsigned int size = 0;
 
     tComplex *pBuf = NULL;
-    int retval;
+    unsigned int temp;
+    int i;
 
 
     if (argc != 4)
     {
-        printf("Usage: dft T_INPUT.txt F_OUTPUT.txt N_POINT\n\n");
+        printf("Usage: fft T_INPUT.txt F_OUTPUT.txt N_POINT\n\n");
         return 0;
     }
 
     pIn  = argv[1];
     pOut = argv[2];
-    size = atoi( argv[3] );
+    temp = strtoul(argv[3], NULL, 10);
+    for (i=1; i<31; i++)
+    {
+        if (temp == (0x1 << i))
+        {
+            size = temp;
+            break;
+        }
+    }
+    if (0 == size)
+    {
+        printf("ERR: incorrect FFT size (%d)\n\n", temp);
+        goto _EXIT_FFT;
+    }
 
     pBuf = malloc(size * sizeof( tComplex ));
     if ( pBuf )
     {
-        retval = parse_complex(pIn, pBuf, size);
-        if (retval != size)
-        {
-            printf("ERR: incorrect number of input data (%d)\n\n", retval);
-            goto _EXIT_DFT;
-        }
+        parse_complex(pIn, pBuf, size);
 
         /* Radix-2 Decimation-In-Time FFT */
-        dit_fft(pBuf, size);
+        fft(pBuf, size);
 
         store_complex(pOut, pBuf, size);
     }
 
 
-_EXIT_DFT:
+_EXIT_FFT:
     if ( pBuf ) free( pBuf );
     return 0;
 }

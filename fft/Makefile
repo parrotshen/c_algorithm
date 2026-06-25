@@ -1,8 +1,11 @@
 CC = gcc
 
-all: dft dft_detail
+all: fft fft_shift dft_detail
 
-dft: dft.o utility.o
+fft: fft.o utility.o
+	$(CC) $^ -lm -o $@
+
+fft_shift: fft_shift.o utility.o
 	$(CC) $^ -lm -o $@
 
 dft_detail: dft_detail.o utility.o
@@ -12,4 +15,4 @@ dft_detail: dft_detail.o utility.o
 	$(CC) -Wall -c $<
 
 clean:
-	rm -f dft dft_detail *.o
+	rm -f fft fft_shift dft_detail *.o

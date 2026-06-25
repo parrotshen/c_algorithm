@@ -33,6 +33,26 @@ void dump(void *pAddr, unsigned int size)
     }
 }
 
+int count_lines(char *pFileName)
+{
+    FILE *pInput;
+    char line[256];
+    int count = 0;
+
+    if ((pInput=fopen(pFileName, "r")) == NULL)
+    {
+        perror( "fopen" );
+        return 0;
+    }
+    while ( fgets(line, 255, pInput) )
+    {
+        count++;
+    }
+    fclose( pInput );
+
+    return count;
+}
+
 char *parse_token(char *pString, char *pToken, int tsize)
 {
     int i = 0;
@@ -114,7 +134,7 @@ int parse_complex(char *pFileName, tComplex *pBuf, int num)
             {
                 if (count >= num)
                 {
-                    printf("ERR: ignore data (> %d)\n", num);
+                    printf("WRN: ignore data (> %d)\n", num);
                     goto _EXIT_PARSE;
                 }
 

@@ -12,6 +12,7 @@ typedef struct _tComplex
 
 
 void dump(void *pAddr, unsigned int size);
+int count_lines(char *pFileName);
 int parse_complex(char *pFileName, tComplex *pBuf, int num);
 int store_complex(char *pFileName, tComplex *pBuf, int num);
 
