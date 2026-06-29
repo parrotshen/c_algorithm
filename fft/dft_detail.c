@@ -5,11 +5,6 @@
 #include "utility.h"
 
 
-#define PRINT_1 0
-#define PRINT_2 1
-#define PRINT_3 0
-
-
 /*
 * DFT:
 *          N-1
@@ -17,9 +12,12 @@
 *          n=0
 *     k = 0, 1, 2 ... N-1
 */
-void dft_detail(double x[], tComplex X[], int N)
+void dft_detail(tComplex x[], tComplex X[], int N)
 {
+    tComplex temp;
     tComplex W;
+    int half;
+    int freq;
     int n;
     int k;
 
@@ -27,86 +25,86 @@ void dft_detail(double x[], tComplex X[], int N)
     * W[k,n] = e^(-j*2*pi*k*n/N)
     *        = cos(2*pi*k*n/N) - j*sin(2*pi*k*n/N)
     */
+    half = ((N & 0x1) ? N/2 : N/2-1);
     for (k=0; k<N; k++)
     {
+        freq = ((k > half) ? (k-N) : k);
+        printf("[1;33m%dHz[0m\n", freq);
         X[k].real = 0;
         X[k].imag = 0;
-        n = 0;
+        for (n=0; n<N; n++)
         {
             W.real =  cos(2*M_PI*k*n/N);
             W.imag = -sin(2*M_PI*k*n/N);
-            #if (PRINT_1)
-            printf("%+f\n", W.real);
-            #endif
-            #if (PRINT_2)
-            printf("%+f\n", (x[n] * W.real));
-            #endif
-            X[k].real += (x[n] * W.real);
-            X[k].imag += (x[n] * W.imag);
-            #if (PRINT_3)
-            printf("%+f\n", X[k].real);
-            #endif
+            COMPLEX_MUL(x[n], W, temp);
+            printf("X[%d] =%+10f, x[%d] * cos(2*pi*%d*%d/%d) = %+f\n",
+                k,
+                X[k].real,
+                n,
+                k,
+                n,
+                N,
+                temp.real
+            );
+            COMPLEX_ADD(X[k], temp, X[k]);
         }
-        for (n=1; n<N; n++)
-        {
-            W.real =  cos(2*M_PI*k*n/N);
-            W.imag = -sin(2*M_PI*k*n/N);
-            if ((n != 1) && ((n % 11) == 0)) printf("\n");
-            #if (PRINT_1)
-            printf("%+f ", W.real);
-            #endif
-            #if (PRINT_2)
-            printf("%+f ", (x[n] * W.real));
-            #endif
-            X[k].real += (x[n] * W.real);
-            X[k].imag += (x[n] * W.imag);
-            #if (PRINT_3)
-            printf("%+f ", X[k].real);
-            #endif
-        }
-        printf("\n");
-        //X[k].real /= N;
-        //X[k].imag /= N;
-        printf("[1;33m%2d %+f[0m\n", k, X[k].real);
+        printf("X[%d] =[1;33m%+10f[0m\n", k, X[k].real);
     }
     printf("\n");
 }
 
 int main(int argc, char *argv[])
 {
-#define POINTS 21
-    tComplex X[POINTS];
-    double x[POINTS];
-    double f = 3;
-    int N = POINTS;
+    tComplex x[32];
+    tComplex X[32];
+    double f = 1;
+    int N = 8;
+    int half;
     int n;
     int k;
 
+    if (argc > 1)
+    {
+        N = atoi( argv[1] );
+        if (N < 8) N = 8;
+        if (N > 32) N = 32;
+    }
+    if (argc > 2)
+    {
+        half = (N & 0x1) ? (N/2): (N/2-1);
+        f = atoi( argv[2] );
+        if (f < 1) f = 1;
+        if (f > half) f = half;
+    }
 
     for (n=0; n<N; n++)
     {
-        x[n] = cos(2*M_PI*f*n/N);
-        #if 0
-        printf("%d %+f\n", n, x[n]);
-        #endif
+        x[n].real = cos(2*M_PI*f*n/N);
+        x[n].imag = 0;
     }
 
     dft_detail(x, X, N);
 
-    #if 1
     printf("x[n]:\n");
     for (n=0; n<N; n++)
     {
-        printf("%+10.6f\n", x[n]);
+        printf("%+10f %+10f\n", x[n].real, x[n].imag);
     }
     printf("\n");
+
     printf("X[k]:\n");
     for (k=0; k<N; k++)
     {
-        printf("%+10.6f %+10.6fi\n", X[k].real, X[k].imag);
+        if ((k == f) || (k == (N-f)))
+        {
+            printf("[1;36m%+10f %+10fi[0m\n", X[k].real, X[k].imag);
+        }
+        else
+        {
+            printf("%+10f %+10fi\n", X[k].real, X[k].imag);
+        }
     }
     printf("\n");
-    #endif
 
     return 0;
 }

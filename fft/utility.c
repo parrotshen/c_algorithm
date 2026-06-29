@@ -176,3 +176,14 @@ int store_complex(char *pFileName, tComplex *pBuf, int num)
     return 0;
 }
 
+void print_complex(char *pStr, tComplex *pBuf, int num)
+{
+    int i;
+
+    printf("%s\n", pStr);
+    for (i=0; i<num; i++)
+    {
+        printf("%+10f %+10fi\n", pBuf[i].real, pBuf[i].imag);
+    }
+    printf("\n");
+}

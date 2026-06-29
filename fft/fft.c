@@ -48,7 +48,6 @@ void fft(tComplex *pData, unsigned int size)
         }
     }
 
-
     /* N/2-point DFT */
     n = 0;
     N = 1;
@@ -122,7 +121,6 @@ void ifft(tComplex *pData, unsigned int size)
         }
     }
 
-
     /* N/2-point IDFT */
     n = 0;
     N = 1;
@@ -163,9 +161,8 @@ int main(int argc, char *argv[])
 {
     char *pIn = NULL;
     char *pOut = NULL;
-    unsigned int size = 0;
-
     tComplex *pBuf = NULL;
+    unsigned int size = 0;
     unsigned int temp;
     int i;
 
@@ -200,6 +197,7 @@ int main(int argc, char *argv[])
 
         /* Radix-2 Decimation-In-Time FFT */
         fft(pBuf, size);
+        print_complex("FFT:", pBuf, size);
 
         store_complex(pOut, pBuf, size);
     }
