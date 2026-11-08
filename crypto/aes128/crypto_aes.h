@@ -107,5 +107,39 @@ uint32 crypto_aes_cbc_decrypt(
     uint8         *pIv
 );
 
+/**
+ * Encrypt a sequence of data in CTR mode.
+ * @param [in]  pCtx   A @ref tCryptoAesCtx object.
+ * @param [in]  pOut   Ciphertext buffer.
+ * @param [in]  pIn    Plaintext buffer.
+ * @param [in]  inLen  Plaintext length.
+ * @param [in]  pIv    IV buffer.
+ * @returns  Bytes of the ciphertext.
+ */
+uint32 crypto_aes_ctr_encrypt(
+    tCryptoAesCtx *pCtx,
+    uint8         *pOut,
+    uint8         *pIn,
+    uint32         inLen,
+    uint8         *pIv
+);
+
+/**
+ * Decrypt a sequence of data in CTR mode.
+ * @param [in]  pCtx   A @ref tCryptoAesCtx object.
+ * @param [in]  pOut   Plaintext buffer.
+ * @param [in]  pIn    Ciphertext buffer.
+ * @param [in]  inLen  Ciphertext length.
+ * @param [in]  pIv    IV buffer.
+ * @returns  Bytes of the plaintext.
+ */
+uint32 crypto_aes_ctr_decrypt(
+    tCryptoAesCtx *pCtx,
+    uint8         *pOut,
+    uint8         *pIn,
+    uint32         inLen,
+    uint8         *pIv
+);
+
 
 #endif // _CRYPTO_AES_H_

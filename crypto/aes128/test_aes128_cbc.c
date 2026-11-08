@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "crypto_aes.h"
+
+
+uint8 KEY[CRYPTO_AES_128_KEY_SIZE] = {
+ 0x6C, 0x3E, 0xA0, 0x47, 0x76, 0x30, 0xCE, 0x21,
+ 0xA2, 0xCE, 0x33, 0x4A, 0xA7, 0x46, 0xC2, 0xCD
+};
+uint8 IV[CRYPTO_AES_128_KEY_SIZE] = {
+ 0xC7, 0x82, 0xDC, 0x4C, 0x09, 0x8C, 0x66, 0xCB,
+ 0xD9, 0xCD, 0x27, 0xD8, 0x25, 0x68, 0x2C, 0x81
+};
+uint8 P_IN[48] = {
+ 'T',  'h',  'i',  's',  ' ',  'i',  's',  ' ',
+ 'a',  ' ',  '4',  '8',  '-',  'b',  'y',  't',
+ 'e',  ' ',  'm',  'e',  's',  's',  'a',  'g',
+ 'e',  ' ',  '(',  'e',  'x',  'a',  'c',  't',
+ 'l',  'y',  ' ',  '3',  ' ',  'A',  'E',  'S',
+ ' ',  'b',  'l',  'o',  'c',  'k',  's',  ')'
+};
+uint8 C_IN[48] = {
+ 0xd0, 0xa0, 0x2b, 0x38, 0x36, 0x45, 0x17, 0x53,
+ 0xd4, 0x93, 0x66, 0x5d, 0x33, 0xf0, 0xe8, 0x86,
+ 0x2d, 0xea, 0x54, 0xcd, 0xb2, 0x93, 0xab, 0xc7,
+ 0x50, 0x69, 0x39, 0x27, 0x67, 0x72, 0xf8, 0xd5,
+ 0x02, 0x1c, 0x19, 0x21, 0x6b, 0xad, 0x52, 0x5c,
+ 0x85, 0x79, 0x69, 0x5d, 0x83, 0xba, 0x26, 0x84
+};
+uint8 P_OUT[48];
+uint8 C_OUT[48];
+
+
+int main(void)
+{
+    tCryptoAesCtx ctx;
+
+    crypto_aes_init();
+
+    if (0 != crypto_aes_setKey(&ctx, KEY, CRYPTO_AES_128_KEY_SIZE))
+    {
+        printf("ERR: fail to set key (AES)\n");
+        return -1;
+    }
+
+    /* AES CBC 128-bit encryption */
+    crypto_aes_cbc_encrypt(&ctx, C_OUT, P_IN, 48, IV);
+    printf("[Encryption] ciphertext:\n");
+    util_dump(C_OUT, 48);
+
+    /* AES CBC 128-bit decryption */
+    crypto_aes_cbc_decrypt(&ctx, P_OUT, C_IN, 48, IV);
+    printf("[Decryption] plaintext:\n");
+    util_dump(P_OUT, 48);
+
+    return 0;
+}
+

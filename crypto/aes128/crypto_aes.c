@@ -1148,6 +1148,13 @@ uint32 crypto_aes_cbc_encrypt(
         // Encrypt the first Block length less than 16 bytes
         memcpy(C, IV, CRYPTO_AES_BLOCK_SIZE);
         util_xor(C, C, P, inLen);
+        #if (AES_CBC_DEBUG)
+        printf("P\n");
+        util_dump(P, inLen);
+        printf("P^C\n");
+        util_dump(C, CRYPTO_AES_BLOCK_SIZE);
+        #endif
+
         crypto_aes_encrypt(pCtx, C, C);
         #if (AES_CBC_DEBUG)
         printf("C\n");
@@ -1248,6 +1255,11 @@ uint32 crypto_aes_cbc_decrypt(
         memset(P, 0x00, CRYPTO_AES_BLOCK_SIZE);
         memcpy(P, C, inLen);
         crypto_aes_decrypt(pCtx, P, P);
+        #if (AES_CBC_DEBUG)
+        printf("C\n");
+        util_dump(P, inLen);
+        #endif
+
         util_xor(P, IV, P, CRYPTO_AES_BLOCK_SIZE);
         #if (AES_CBC_DEBUG)
         printf("P\n");
@@ -1295,6 +1307,228 @@ uint32 crypto_aes_cbc_decrypt(
                 #endif
 
                 IV  = C;
+                P  += CRYPTO_AES_BLOCK_SIZE;
+                C  += CRYPTO_AES_BLOCK_SIZE;
+            }
+        }
+    }
+
+    return (CRYPTO_AES_BLOCK_SIZE * n);
+}
+
+
+#define AES_CTR_DEBUG (0)
+
+/**
+ * Encrypt a sequence of data in CTR mode.
+ * @param [in]  pCtx   A @ref tCryptoAesCtx object.
+ * @param [in]  pOut   Ciphertext buffer.
+ * @param [in]  pIn    Plaintext buffer.
+ * @param [in]  inLen  Plaintext length.
+ * @param [in]  pIv    IV buffer.
+ * @returns  Bytes of the ciphertext.
+ */
+uint32 crypto_aes_ctr_encrypt(
+    tCryptoAesCtx *pCtx,
+    uint8         *pOut,
+    uint8         *pIn,
+    uint32         inLen,
+    uint8         *pIv
+)
+{
+    uint8  *IV = pIv;
+    uint8  *C  = pOut;
+    uint8  *P  = pIn;
+    uint32  count;
+    uint32  n;
+    uint32  r;
+    int     i;
+
+
+    n = CRYPTO_AES_BLOCK_NUM( inLen );
+    r = CRYPTO_AES_REMAIN_LEN( inLen );
+    #if (AES_CTR_DEBUG)
+    printf("Block# is %d (%u bytes)\n\n", n, inLen);
+    #endif
+
+    if (1 == n)
+    {
+        #if (AES_CTR_DEBUG)
+        printf("Block[%d]\n", 0);
+        #endif
+
+        // Encrypt the first Block length less than 16 bytes
+        memcpy(C, IV, CRYPTO_AES_BLOCK_SIZE);
+        crypto_aes_encrypt(pCtx, C, C);
+        #if (AES_CTR_DEBUG)
+        printf("C\n");
+        util_dump(C, CRYPTO_AES_BLOCK_SIZE);
+        #endif
+
+        util_xor(C, C, P, inLen);
+        #if (AES_CTR_DEBUG)
+        printf("P^C\n");
+        util_dump(C, CRYPTO_AES_BLOCK_SIZE);
+        #endif
+    }
+    else
+    {
+        for (i=0; i<n; i++)
+        {
+            #if (AES_CTR_DEBUG)
+            printf("Block[%d]\n", i);
+            #endif
+
+            if ((i == (n-1)) && (r > 0))
+            {
+                // Encrypt in Residual Terminal Block Processing
+                memcpy(C, IV, CRYPTO_AES_BLOCK_SIZE);
+                BYTE_ARRAY_TO_UINT32((C + CRYPTO_AES_BLOCK_SIZE - 4), count);
+                count += i;
+                UINT32_TO_BYTE_ARRAY(count, (C + CRYPTO_AES_BLOCK_SIZE - 4));
+                crypto_aes_encrypt(pCtx, C, C);
+                #if (AES_CTR_DEBUG)
+                printf("Cn\n");
+                util_dump(C, CRYPTO_AES_BLOCK_SIZE);
+                #endif
+
+                util_xor(C, C, P, r);
+                #if (AES_CTR_DEBUG)
+                printf("Pn\n");
+                util_dump(P, r);
+                printf("Pn^Cn\n");
+                util_dump(C, CRYPTO_AES_BLOCK_SIZE);
+                #endif
+            }
+            else
+            {
+                // Encrypt Block 1 ~ n-1
+                memcpy(C, IV, CRYPTO_AES_BLOCK_SIZE);
+                BYTE_ARRAY_TO_UINT32((C + CRYPTO_AES_BLOCK_SIZE - 4), count);
+                count += i;
+                UINT32_TO_BYTE_ARRAY(count, (C + CRYPTO_AES_BLOCK_SIZE - 4));
+                crypto_aes_encrypt(pCtx, C, C);
+                #if (AES_CTR_DEBUG)
+                printf("C\n");
+                util_dump(C, CRYPTO_AES_BLOCK_SIZE);
+                #endif
+
+                util_xor(C, C, P, CRYPTO_AES_BLOCK_SIZE);
+                #if (AES_CTR_DEBUG)
+                printf("P\n");
+                util_dump(P, CRYPTO_AES_BLOCK_SIZE);
+                printf("P^C\n");
+                util_dump(C, CRYPTO_AES_BLOCK_SIZE);
+                #endif
+
+                P  += CRYPTO_AES_BLOCK_SIZE;
+                C  += CRYPTO_AES_BLOCK_SIZE;
+            }
+        }
+    }
+
+    return (CRYPTO_AES_BLOCK_SIZE * n);
+}
+
+/**
+ * Decrypt a sequence of data in CTR mode.
+ * @param [in]  pCtx   A @ref tCryptoAesCtx object.
+ * @param [in]  pOut   Plaintext buffer.
+ * @param [in]  pIn    Ciphertext buffer.
+ * @param [in]  inLen  Ciphertext length.
+ * @param [in]  pIv    IV buffer.
+ * @returns  Bytes of the plaintext.
+ */
+uint32 crypto_aes_ctr_decrypt(
+    tCryptoAesCtx *pCtx,
+    uint8         *pOut,
+    uint8         *pIn,
+    uint32         inLen,
+    uint8         *pIv
+)
+{
+    uint8  *IV = pIv;
+    uint8  *P  = pOut;
+    uint8  *C  = pIn;
+    uint32  count;
+    uint32  n;
+    uint32  r;
+    int     i;
+
+
+    n = CRYPTO_AES_BLOCK_NUM( inLen );
+    r = CRYPTO_AES_REMAIN_LEN( inLen );
+    #if (AES_CTR_DEBUG)
+    printf("Block# is %d (%u bytes)\n\n", n, inLen);
+    #endif
+
+    if (1 == n)
+    {
+        #if (AES_CTR_DEBUG)
+        printf("Block[%d]\n", 0);
+        #endif
+
+        //Decrypt the first Block length less than 16 bytes
+        memcpy(P, IV, CRYPTO_AES_BLOCK_SIZE);
+        crypto_aes_encrypt(pCtx, P, P);
+        #if (AES_CTR_DEBUG)
+        printf("C\n");
+        util_dump(P, CRYPTO_AES_BLOCK_SIZE);
+        #endif
+
+        util_xor(P, P, C, inLen);
+        #if (AES_CTR_DEBUG)
+        printf("P^C\n");
+        util_dump(P, CRYPTO_AES_BLOCK_SIZE);
+        #endif
+    }
+    else
+    {
+        for (i=0; i<n; i++)
+        {
+            #if (AES_CTR_DEBUG)
+            printf("Block[%d]\n", i);
+            #endif
+
+            if ((i == (n-1)) && (r > 0))
+            {
+                //Decrypt in Residual Terminal Block Processing
+                memcpy(P, IV, CRYPTO_AES_BLOCK_SIZE);
+                BYTE_ARRAY_TO_UINT32((P + CRYPTO_AES_BLOCK_SIZE - 4), count);
+                count += i;
+                UINT32_TO_BYTE_ARRAY(count, (P + CRYPTO_AES_BLOCK_SIZE - 4));
+                *((uint32 *)(P + CRYPTO_AES_BLOCK_SIZE - 4)) += i;
+                crypto_aes_encrypt(pCtx, P, P);
+                #if (AES_CTR_DEBUG)
+                printf("Cn\n");
+                util_dump(P, CRYPTO_AES_BLOCK_SIZE);
+                #endif
+
+                util_xor(P, P, C, CRYPTO_AES_BLOCK_SIZE);
+                #if (AES_CTR_DEBUG)
+                printf("Pn^Cn\n");
+                util_dump(P, CRYPTO_AES_BLOCK_SIZE);
+                #endif
+            }
+            else
+            {
+                //Decrypt Block 1 ~ n-1
+                memcpy(P, IV, CRYPTO_AES_BLOCK_SIZE);
+                BYTE_ARRAY_TO_UINT32((P + CRYPTO_AES_BLOCK_SIZE - 4), count);
+                count += i;
+                UINT32_TO_BYTE_ARRAY(count, (P + CRYPTO_AES_BLOCK_SIZE - 4));
+                crypto_aes_encrypt(pCtx, P, P);
+                #if (AES_CTR_DEBUG)
+                printf("C\n");
+                util_dump(P, CRYPTO_AES_BLOCK_SIZE);
+                #endif
+
+                util_xor(P, P, C, CRYPTO_AES_BLOCK_SIZE);
+                #if (AES_CTR_DEBUG)
+                printf("P^C\n");
+                util_dump(P, CRYPTO_AES_BLOCK_SIZE);
+                #endif
+
                 P  += CRYPTO_AES_BLOCK_SIZE;
                 C  += CRYPTO_AES_BLOCK_SIZE;
             }

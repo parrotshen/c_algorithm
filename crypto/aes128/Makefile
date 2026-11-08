@@ -1,12 +1,16 @@
 CC = gcc
-APP_NAME = aes128_test
+APP_1 = test_aes128
+APP_2 = test_aes128_cbc
+APP_3 = test_aes128_ctr
 
 
 ##################
 # Source
 ##################
 
-SRC = main.c
+SRC += test_aes128.c
+SRC += test_aes128_cbc.c
+SRC += test_aes128_ctr.c
 SRC += crypto_aes.c
 SRC += ../utility/utility.c
 
@@ -15,7 +19,7 @@ SRC += ../utility/utility.c
 # CFLAGS
 ##################
 
-CFLAGS = -Wall
+CFLAGS += -Wall
 CFLAGS += -D_LITTLE_ENDIAN_
 CFLAGS += -I../utility/
 
@@ -24,41 +28,30 @@ CFLAGS += -I../utility/
 # LDFLAGS
 ##################
 
-LDFLAGS = -Wall
+LDFLAGS += 
 
 
 #################
 # Build
 #################
 
-DEP_CFLAGS = $(filter-out -g, $(CFLAGS))
-DEPEND_CMD = $(CC) $(DEP_CFLAGS) -M $<
-
 OBJS = $(SRC:.c=.o)
-DEPS = $(SRC:.c=.c.d)
 
+all: $(APP_1) $(APP_2) $(APP_3)
 
-all: $(APP_NAME)
-	@echo "Build ... $(APP_NAME)"
+$(APP_1): test_aes128.o crypto_aes.o ../utility/utility.o
+	$(CC) $(LDFLAGS) $^ -o $@
 
--include $(DEPS)
+$(APP_2): test_aes128_cbc.o crypto_aes.o ../utility/utility.o
+	$(CC) $(LDFLAGS) $^ -o $@
 
-$(APP_NAME): $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) -o $@
+$(APP_3): test_aes128_ctr.o crypto_aes.o ../utility/utility.o
+	$(CC) $(LDFLAGS) $^ -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-ifneq ($(MAKECMDGOALS), clean)
-%.c.d: %.c
-	@echo Generating depend file $(subst $(BASE_DIR)/,,$(@))
-	@echo "$@ \\"        >  $@
-	@echo -n "$(dir $<)" >> $@
-	@$(DEPEND_CMD)       >> $@ || $(RM) $@
-endif
-
 clean:
-	@echo "Clean ... $(APP_NAME)"
-	@rm -f $(APP_NAME) $(OBJS) $(DEPS)
+	@rm -f $(APP_1) $(APP_2) $(APP_3) $(OBJS)
 
 .PHONY: all clean
