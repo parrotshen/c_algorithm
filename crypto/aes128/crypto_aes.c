@@ -1339,10 +1339,10 @@ uint32 crypto_aes_ctr_encrypt(
     uint8  *IV = pIv;
     uint8  *C  = pOut;
     uint8  *P  = pIn;
-    uint32  count;
+    uint64  count;
     uint32  n;
     uint32  r;
-    int     i;
+    uint32  i;
 
 
     n = CRYPTO_AES_BLOCK_NUM( inLen );
@@ -1383,9 +1383,9 @@ uint32 crypto_aes_ctr_encrypt(
             {
                 // Encrypt in Residual Terminal Block Processing
                 memcpy(C, IV, CRYPTO_AES_BLOCK_SIZE);
-                BYTE_ARRAY_TO_UINT32((C + CRYPTO_AES_BLOCK_SIZE - 4), count);
+                BYTE_ARRAY_TO_UINT64((C + CRYPTO_AES_BLOCK_SIZE - 8), count);
                 count += i;
-                UINT32_TO_BYTE_ARRAY(count, (C + CRYPTO_AES_BLOCK_SIZE - 4));
+                UINT64_TO_BYTE_ARRAY(count, (C + CRYPTO_AES_BLOCK_SIZE - 8));
                 crypto_aes_encrypt(pCtx, C, C);
                 #if (AES_CTR_DEBUG)
                 printf("Cn\n");
@@ -1404,9 +1404,9 @@ uint32 crypto_aes_ctr_encrypt(
             {
                 // Encrypt Block 1 ~ n-1
                 memcpy(C, IV, CRYPTO_AES_BLOCK_SIZE);
-                BYTE_ARRAY_TO_UINT32((C + CRYPTO_AES_BLOCK_SIZE - 4), count);
+                BYTE_ARRAY_TO_UINT64((C + CRYPTO_AES_BLOCK_SIZE - 8), count);
                 count += i;
-                UINT32_TO_BYTE_ARRAY(count, (C + CRYPTO_AES_BLOCK_SIZE - 4));
+                UINT64_TO_BYTE_ARRAY(count, (C + CRYPTO_AES_BLOCK_SIZE - 8));
                 crypto_aes_encrypt(pCtx, C, C);
                 #if (AES_CTR_DEBUG)
                 printf("C\n");
@@ -1450,10 +1450,10 @@ uint32 crypto_aes_ctr_decrypt(
     uint8  *IV = pIv;
     uint8  *P  = pOut;
     uint8  *C  = pIn;
-    uint32  count;
+    uint64  count;
     uint32  n;
     uint32  r;
-    int     i;
+    uint32  i;
 
 
     n = CRYPTO_AES_BLOCK_NUM( inLen );
@@ -1494,10 +1494,9 @@ uint32 crypto_aes_ctr_decrypt(
             {
                 //Decrypt in Residual Terminal Block Processing
                 memcpy(P, IV, CRYPTO_AES_BLOCK_SIZE);
-                BYTE_ARRAY_TO_UINT32((P + CRYPTO_AES_BLOCK_SIZE - 4), count);
+                BYTE_ARRAY_TO_UINT64((P + CRYPTO_AES_BLOCK_SIZE - 8), count);
                 count += i;
-                UINT32_TO_BYTE_ARRAY(count, (P + CRYPTO_AES_BLOCK_SIZE - 4));
-                *((uint32 *)(P + CRYPTO_AES_BLOCK_SIZE - 4)) += i;
+                UINT64_TO_BYTE_ARRAY(count, (P + CRYPTO_AES_BLOCK_SIZE - 8));
                 crypto_aes_encrypt(pCtx, P, P);
                 #if (AES_CTR_DEBUG)
                 printf("Cn\n");
@@ -1514,9 +1513,9 @@ uint32 crypto_aes_ctr_decrypt(
             {
                 //Decrypt Block 1 ~ n-1
                 memcpy(P, IV, CRYPTO_AES_BLOCK_SIZE);
-                BYTE_ARRAY_TO_UINT32((P + CRYPTO_AES_BLOCK_SIZE - 4), count);
+                BYTE_ARRAY_TO_UINT64((P + CRYPTO_AES_BLOCK_SIZE - 8), count);
                 count += i;
-                UINT32_TO_BYTE_ARRAY(count, (P + CRYPTO_AES_BLOCK_SIZE - 4));
+                UINT64_TO_BYTE_ARRAY(count, (P + CRYPTO_AES_BLOCK_SIZE - 8));
                 crypto_aes_encrypt(pCtx, P, P);
                 #if (AES_CTR_DEBUG)
                 printf("C\n");
